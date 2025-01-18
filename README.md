@@ -1,4 +1,4 @@
-# DB Manager
+# db_manager
 
 A simple Qt-based database management tool that supports MySQL and PostgreSQL connections.
 
@@ -14,3 +14,5 @@ A simple Qt-based database management tool that supports MySQL and PostgreSQL co
 * Transaction support for data modifications
 * Server connection settings storage
 * Dark theme support
+
+![](screenshots/2025-01-18_15-57.png)
