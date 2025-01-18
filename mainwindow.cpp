@@ -36,17 +36,17 @@ void MainWindow::setupUI()
     setCentralWidget(mainSplitter);
 
     serversTree = new QTreeWidget(mainSplitter);
-    serversTree->setHeaderLabels({tr("Серверы")});
+    serversTree->setHeaderLabels({tr("Servers")});
     serversTree->setContextMenuPolicy(Qt::CustomContextMenu);
 
     auto rightPanel = new QWidget(mainSplitter);
     auto rightLayout = new QVBoxLayout(rightPanel);
 
     queryEdit = new QTextEdit(rightPanel);
-    queryEdit->setPlaceholderText(tr("Введите SQL запрос..."));
+    queryEdit->setPlaceholderText(tr("Enter SQL query..."));
     rightLayout->addWidget(queryEdit);
 
-    auto executeButton = new QPushButton(tr("Выполнить"), rightPanel);
+    auto executeButton = new QPushButton(tr("Execute"), rightPanel);
     rightLayout->addWidget(executeButton);
 
     dataTable = new QTableWidget(rightPanel);
@@ -57,8 +57,8 @@ void MainWindow::setupUI()
 
     dataTable->setContextMenuPolicy(Qt::CustomContextMenu);
     tableContextMenu = new QMenu(this);
-    tableContextMenu->addAction(tr("Копировать"), this, &MainWindow::copySelectedCells);
-    tableContextMenu->addAction(tr("Экспорт"), this, &MainWindow::exportToFile);
+    tableContextMenu->addAction(tr("Copy"), this, &MainWindow::copySelectedCells);
+    tableContextMenu->addAction(tr("Export"), this, &MainWindow::exportToFile);
 
     connect(serversTree, &QTreeWidget::itemDoubleClicked, this, &MainWindow::handleTreeItemDoubleClick);
     connect(serversTree, &QTreeWidget::customContextMenuRequested, this, &MainWindow::showContextMenu);
@@ -79,18 +79,18 @@ void MainWindow::setupUI()
 
 void MainWindow::setupMenus()
 {
-    auto fileMenu = menuBar()->addMenu(tr("Файл"));
-    fileMenu->addAction(tr("Добавить сервер"), this, &MainWindow::addServer);
-    fileMenu->addAction(tr("Настройки"), this, &MainWindow::showSettings);
+    auto fileMenu = menuBar()->addMenu(tr("File"));
+    fileMenu->addAction(tr("Add Server"), this, &MainWindow::addServer);
+    fileMenu->addAction(tr("Settings"), this, &MainWindow::showSettings);
     fileMenu->addSeparator();
-    fileMenu->addAction(tr("Выход"), this, &QWidget::close);
+    fileMenu->addAction(tr("Exit"), this, &QWidget::close);
 }
 
 void MainWindow::setupToolbar()
 {
-    auto toolbar = addToolBar(tr("Основная панель"));
-    toolbar->addAction(tr("Добавить сервер"), this, &MainWindow::addServer);
-    toolbar->addAction(tr("Настройки"), this, &MainWindow::showSettings);
+    auto toolbar = addToolBar(tr("Main Toolbar"));
+    toolbar->addAction(tr("Add Server"), this, &MainWindow::addServer);
+    toolbar->addAction(tr("Settings"), this, &MainWindow::showSettings);
 }
 
 void MainWindow::setupStatusBar()
@@ -157,8 +157,8 @@ void MainWindow::removeServer()
     if (!item) return;
 
     QString serverName = item->text(0);
-    if (QMessageBox::question(this, tr("Удаление сервера"),
-                            tr("Вы уверены, что хотите удалить сервер %1?").arg(serverName)) 
+    if (QMessageBox::question(this, tr("Delete Server"),
+                            tr("Are you sure you want to delete server %1?").arg(serverName)) 
         == QMessageBox::Yes) {
         dbConnection.removeServerSettings(serverName);
         delete item;
@@ -194,8 +194,8 @@ void MainWindow::connectToServer(QTreeWidgetItem *item)
         item->setExpanded(true);
     } else {
         updateServerStatus(item, false);
-        QMessageBox::critical(this, tr("Ошибка"),
-                            tr("Не удалось подключиться к серверу: %1")
+        QMessageBox::critical(this, tr("Error"),
+                            tr("Failed to connect to server: %1")
                             .arg(dbConnection.lastError().text()));
     }
 }
@@ -204,10 +204,10 @@ void MainWindow::updateServerStatus(QTreeWidgetItem *serverItem, bool connected)
 {
     if (connected) {
         serverItem->setIcon(0, QIcon::fromTheme("network-server"));
-        statusLabel->setText(tr("Подключено к %1").arg(serverItem->text(0)));
+        statusLabel->setText(tr("Connected to %1").arg(serverItem->text(0)));
     } else {
         serverItem->setIcon(0, QIcon::fromTheme("network-offline"));
-        statusLabel->setText(tr("Отключено"));
+        statusLabel->setText(tr("Disconnected"));
     }
 }
 
@@ -215,7 +215,7 @@ void MainWindow::executeQuery()
 {
     QString query = queryEdit->toPlainText().trimmed();
     if (query.isEmpty()) {
-        QMessageBox::warning(this, tr("Предупреждение"), tr("Введите SQL запрос"));
+        QMessageBox::warning(this, tr("Warning"), tr("Enter SQL query"));
         return;
     }
 
@@ -242,11 +242,11 @@ void MainWindow::executeQuery()
             }
         }
 
-        statusLabel->setText(tr("Запрос выполнен успешно"));
+        statusLabel->setText(tr("Query executed successfully"));
         executionTimeLabel->setText(dbConnection.getLastExecutionTime());
     } else {
-        QMessageBox::critical(this, tr("Ошибка"),
-                            tr("Ошибка выполнения запроса: %1")
+        QMessageBox::critical(this, tr("Error"),
+                            tr("Query execution error: %1")
                             .arg(dbConnection.lastError().text()));
     }
 }
@@ -267,10 +267,10 @@ void MainWindow::loadDatabaseTables(QTreeWidgetItem *dbItem)
         }
         
         dbItem->setExpanded(true);
-        statusLabel->setText(tr("База данных %1 загружена").arg(dbName));
+        statusLabel->setText(tr("Data loaded"));
     } else {
-        QMessageBox::critical(this, tr("Ошибка"),
-                            tr("Не удалось подключиться к базе данных: %1")
+        QMessageBox::critical(this, tr("Error"),
+                            tr("Failed to connect to database: %1")
                             .arg(dbConnection.lastError().text()));
     }
 }
@@ -322,11 +322,11 @@ void MainWindow::showTableData(QTreeWidgetItem *item)
 
         dataTable->setUpdatesEnabled(true);
         dataTable->viewport()->update();
-        statusLabel->setText(tr("Данные загружены"));
+        statusLabel->setText(tr("Data loaded"));
         executionTimeLabel->setText(dbConnection.getLastExecutionTime());
     } else {
-        QMessageBox::critical(this, tr("Ошибка"),
-                            tr("Ошибка загрузки данных: %1")
+        QMessageBox::critical(this, tr("Error"),
+                            tr("Failed to load data: %1")
                             .arg(dbConnection.lastError().text()));
     }
 }
@@ -338,9 +338,9 @@ void MainWindow::showContextMenu(const QPoint &pos)
 
     QMenu menu(this);
     if (!item->parent()) {
-        menu.addAction(tr("Подключиться"), [this, item]() { connectToServer(item); });
-        menu.addAction(tr("Редактировать"), this, &MainWindow::editServer);
-        menu.addAction(tr("Удалить"), this, &MainWindow::removeServer);
+        menu.addAction(tr("Connect"), [this, item]() { connectToServer(item); });
+        menu.addAction(tr("Edit"), this, &MainWindow::editServer);
+        menu.addAction(tr("Delete"), this, &MainWindow::removeServer);
     }
     menu.exec(serversTree->mapToGlobal(pos));
 }
@@ -371,13 +371,13 @@ void MainWindow::copySelectedCells()
 
 void MainWindow::exportToFile()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Экспорт данных"),
-                                                  QString(), tr("CSV файлы (*.csv)"));
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Export Data"),
+                                                  QString(), tr("CSV files (*.csv)"));
     if (fileName.isEmpty()) return;
 
     QFile file(fileName);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, tr("Ошибка"), tr("Не удалось открыть файл для записи"));
+        QMessageBox::critical(this, tr("Error"), tr("Failed to open file for writing"));
         return;
     }
 
@@ -400,7 +400,7 @@ void MainWindow::exportToFile()
     }
 
     file.close();
-    statusLabel->setText(tr("Данные экспортированы в %1").arg(fileName));
+    statusLabel->setText(tr("Data exported to %1").arg(fileName));
 }
 
 QString MainWindow::getCurrentTableName() const
@@ -474,13 +474,13 @@ void MainWindow::onCellChanged(int row, int column)
     
     QSqlQuery result;
     if (!dbConnection.executeQuery(updateQuery, result)) {
-        QMessageBox::critical(this, tr("Ошибка"),
-                            tr("Не удалось обновить данные: %1")
+        QMessageBox::critical(this, tr("Error"),
+                            tr("Failed to update data: %1")
                             .arg(dbConnection.lastError().text()));
         item->setText(oldValue);
     } else {
         item->setData(Qt::UserRole, item->text());
-        statusLabel->setText(tr("Данные успешно обновлены"));
+        statusLabel->setText(tr("Data successfully updated"));
     }
     
     dataTable->blockSignals(false);
@@ -563,7 +563,7 @@ void MainWindow::sortTable(int column, Qt::SortOrder order)
     dataTable->setUpdatesEnabled(true);
     dataTable->viewport()->update();
     
-    statusLabel->setText(tr("Данные отсортированы"));
+    statusLabel->setText(tr("Data sorted"));
 }
 
 void MainWindow::handleTreeItemDoubleClick(QTreeWidgetItem *item, int /*column*/)

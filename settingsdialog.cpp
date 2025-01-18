@@ -4,12 +4,12 @@
 SettingsDialog::SettingsDialog(QWidget *parent)
     : QDialog(parent), settings("DBManager", "Settings")
 {
-    setWindowTitle(tr("Настройки"));
+    setWindowTitle(tr("Settings"));
     setMinimumWidth(300);
 
     auto layout = new QVBoxLayout(this);
     
-    auto label = new QLabel(tr("Провайдер БД по умолчанию:"), this);
+    auto label = new QLabel(tr("Default Database Provider:"), this);
     layout->addWidget(label);
 
     driverComboBox = new QComboBox(this);
@@ -23,8 +23,8 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     layout->addWidget(driverComboBox);
 
     auto buttonLayout = new QHBoxLayout;
-    saveButton = new QPushButton(tr("Сохранить"), this);
-    cancelButton = new QPushButton(tr("Отмена"), this);
+    saveButton = new QPushButton(tr("Save"), this);
+    cancelButton = new QPushButton(tr("Cancel"), this);
     
     buttonLayout->addWidget(saveButton);
     buttonLayout->addWidget(cancelButton);

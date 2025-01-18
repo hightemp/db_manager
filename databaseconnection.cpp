@@ -117,7 +117,7 @@ bool DatabaseConnection::executeQuery(const QString& query, QSqlQuery& result) {
     }
     
     QDateTime endTime = QDateTime::currentDateTime();
-    lastExecutionTime = QString("%1 мс").arg(startTime.msecsTo(endTime));
+    lastExecutionTime = QString("%1 ms").arg(startTime.msecsTo(endTime));
     
     if (!success) {
         qDebug() << "Query error:" << result.lastError().text();

@@ -22,9 +22,9 @@ ServersDialog::ServersDialog(QWidget *parent, const QString &serverName)
         userEdit->setText(params.user);
         passwordEdit->setText(params.password);
         
-        setWindowTitle(tr("Редактировать сервер"));
+        setWindowTitle(tr("Edit Server"));
     } else {
-        setWindowTitle(tr("Добавить сервер"));
+        setWindowTitle(tr("Add Server"));
     }
 }
 
@@ -54,13 +54,13 @@ void ServersDialog::setupUI() {
     passwordEdit = new QLineEdit(this);
     passwordEdit->setEchoMode(QLineEdit::Password);
     
-    formLayout->addRow(tr("Имя сервера:"), serverNameEdit);
-    formLayout->addRow(tr("Тип БД:"), driverComboBox);
-    formLayout->addRow(tr("Хост:"), hostEdit);
-    formLayout->addRow(tr("Порт:"), portSpinBox);
-    formLayout->addRow(tr("База данных:"), dbNameEdit);
-    formLayout->addRow(tr("Пользователь:"), userEdit);
-    formLayout->addRow(tr("Пароль:"), passwordEdit);
+    formLayout->addRow(tr("Server Name:"), serverNameEdit);
+    formLayout->addRow(tr("Database Type:"), driverComboBox);
+    formLayout->addRow(tr("Host:"), hostEdit);
+    formLayout->addRow(tr("Port:"), portSpinBox);
+    formLayout->addRow(tr("Database:"), dbNameEdit);
+    formLayout->addRow(tr("Username:"), userEdit);
+    formLayout->addRow(tr("Password:"), passwordEdit);
     
     mainLayout->addLayout(formLayout);
     
@@ -68,9 +68,9 @@ void ServersDialog::setupUI() {
     mainLayout->addWidget(statusLabel);
     
     auto buttonLayout = new QHBoxLayout;
-    testButton = new QPushButton(tr("Проверить соединение"), this);
-    saveButton = new QPushButton(tr("Сохранить"), this);
-    cancelButton = new QPushButton(tr("Отмена"), this);
+    testButton = new QPushButton(tr("Test Connection"), this);
+    saveButton = new QPushButton(tr("Save"), this);
+    cancelButton = new QPushButton(tr("Cancel"), this);
     
     buttonLayout->addWidget(testButton);
     buttonLayout->addStretch();
@@ -107,11 +107,11 @@ void ServersDialog::testConnection() {
     
     DatabaseConnection::ConnectionParams params = getConnectionParams();
     if (dbConnection.connect(params)) {
-        statusLabel->setText(tr("Подключение успешно!"));
+        statusLabel->setText(tr("Connection successful!"));
         statusLabel->setStyleSheet("color: green;");
         dbConnection.disconnect();
     } else {
-        statusLabel->setText(tr("Ошибка подключения: %1").arg(dbConnection.lastError().text()));
+        statusLabel->setText(tr("Connection error: %1").arg(dbConnection.lastError().text()));
         statusLabel->setStyleSheet("color: red;");
     }
 }
@@ -125,19 +125,19 @@ void ServersDialog::validateAndAccept() {
 
 bool ServersDialog::validateInputs() {
     if (serverNameEdit->text().isEmpty()) {
-        QMessageBox::warning(this, tr("Ошибка"), tr("Введите имя сервера"));
+        QMessageBox::warning(this, tr("Error"), tr("Enter server name"));
         return false;
     }
     if (hostEdit->text().isEmpty()) {
-        QMessageBox::warning(this, tr("Ошибка"), tr("Введите адрес хоста"));
+        QMessageBox::warning(this, tr("Error"), tr("Enter host address"));
         return false;
     }
     if (dbNameEdit->text().isEmpty()) {
-        QMessageBox::warning(this, tr("Ошибка"), tr("Введите имя базы данных"));
+        QMessageBox::warning(this, tr("Error"), tr("Enter database name"));
         return false;
     }
     if (userEdit->text().isEmpty()) {
-        QMessageBox::warning(this, tr("Ошибка"), tr("Введите имя пользователя"));
+        QMessageBox::warning(this, tr("Error"), tr("Enter username"));
         return false;
     }
     return true;
