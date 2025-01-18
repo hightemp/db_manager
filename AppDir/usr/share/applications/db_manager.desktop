@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=DB Manager
+Exec=db_manager
+Icon=db_manager
+Type=Application
+Categories=Development;
+Comment=Database Management Tool

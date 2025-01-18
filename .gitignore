@@ -74,3 +74,4 @@ CMakeLists.txt.user*
 
 build/
 db_manager
+db_manager-linux.AppImage
