@@ -72,6 +72,7 @@ CMakeLists.txt.user*
 *.dll
 *.exe
 
+AppDir/
 build/
 db_manager
 db_manager-linux.AppImage
