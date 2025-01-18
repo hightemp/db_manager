@@ -20,91 +20,82 @@ get_os() {
 
 OS=$(get_os)
 
-# Check and install appimagetool if needed
-check_appimagetool() {
-    if ! command -v appimagetool &> /dev/null; then
-        echo "Installing appimagetool..."
-        wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
-        chmod +x appimagetool
-        sudo mv appimagetool /usr/local/bin/
-    fi
-}
-
-# Create AppDir structure with required files
-create_appdir() {
-    # Create basic structure
-    mkdir -p AppDir/usr/bin
-    mkdir -p AppDir/usr/share/applications
-    mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
-
-    # Copy binary
-    cp db_manager AppDir/usr/bin/
-
-    # Create .desktop file
-    cat > AppDir/usr/share/applications/db_manager.desktop << EOF
-[Desktop Entry]
-Name=DB Manager
-Exec=db_manager
-Icon=db_manager
-Type=Application
-Categories=Development;
-Comment=Database Management Tool
-EOF
-
-    # Create a simple icon if it doesn't exist
-    if [ ! -f "icons/db_manager.png" ]; then
-        # Create a temporary icon using convert (from ImageMagick)
-        convert -size 256x256 xc:transparent -font DejaVu-Sans -pointsize 40 -gravity center -draw "text 0,0 'DB\nManager'" AppDir/usr/share/icons/hicolor/256x256/apps/db_manager.png
-    else
-        cp icons/db_manager.png AppDir/usr/share/icons/hicolor/256x256/apps/db_manager.png
-    fi
-
-    # Create symlinks
-    ln -sf usr/share/applications/db_manager.desktop AppDir/db_manager.desktop
-    ln -sf usr/share/icons/hicolor/256x256/apps/db_manager.png AppDir/db_manager.png
-}
-
-# Build for current platform
-build_app() {
-    echo "Building application..."
+# Build for Linux
+build_linux() {
+    echo "Building Linux version..."
     qmake
-    if [ "$OS" = "windows" ]; then
-        nmake
+    make -j$(nproc)
+    
+    # Create release directory and copy binary
+    mkdir -p release/linux
+    cp db_manager release/linux/db_manager
+}
+
+# Build for Windows
+build_windows() {
+    echo "Building Windows version..."
+    
+    # Setup cross-compilation environment
+    if [ "$OS" = "linux" ]; then
+        export MXE_PATH=/usr/lib/mxe/usr/bin
+        export PATH=$MXE_PATH:$PATH
+        
+        # Check if MXE is installed
+        if ! command -v $MXE_PATH/x86_64-w64-mingw32.static-qmake-qt5 &> /dev/null; then
+            echo "MXE (M cross environment) not found. Please install it first."
+            echo "See: https://mxe.cc/"
+            exit 1
+        fi
+        
+        $MXE_PATH/x86_64-w64-mingw32.static-qmake-qt5
+        $MXE_PATH/x86_64-w64-mingw32.static-make -j$(nproc)
+        
+        mkdir -p release/windows
+        mv release/db_manager.exe release/windows/
+        
         # Deploy Qt dependencies
-        windeployqt.exe release/db_manager.exe
-        # Create ZIP archive
-        cd release
-        zip -r ../db_manager-windows.zip *
-        cd ..
+        $MXE_PATH/x86_64-w64-mingw32.static-windeployqt.exe release/windows/db_manager.exe
     else
-        make -j$(nproc)
-        # Check for appimagetool
-        check_appimagetool
-        # Create AppDir with all required files
-        create_appdir
-        # Create AppImage
-        appimagetool AppDir db_manager-linux.AppImage
+        qmake
+        nmake
+        
+        mkdir -p release/windows
+        mv release/db_manager.exe release/windows/
+        windeployqt.exe release/windows/db_manager.exe
     fi
 }
 
-# Build the application
-build_app
+# Clean build artifacts
+cleanup() {
+    echo "Cleaning up..."
+    make clean
+    rm -rf release
+    rm -f *.o moc_* ui_*
+}
+
+# Main build process
+build_all() {
+    cleanup
+    
+    # Build Linux version
+    build_linux
+    
+    # Build Windows version
+    # build_windows
+}
 
 # Create release notes
 NOTES="Release $VERSION
+"
 
-## Changes
-- Please edit this release note
-
-## Downloads
-- Windows: db_manager-windows.zip
-- Linux: db_manager-linux.AppImage"
+# Build all versions
+build_all
 
 # Create a new release using gh
-if [ "$OS" = "windows" ]; then
-    gh release create "$TAG" db_manager-windows.zip --title "Release $VERSION" --notes "$NOTES"
-else
-    gh release create "$TAG" db_manager-linux.AppImage --title "Release $VERSION" --notes "$NOTES"
-fi
+gh release create "$TAG" \
+    "release/linux/db_manager" \
+    --title "Release $VERSION" \
+    --notes "$NOTES" \
+    --prerelease=false
 
-echo "Release $VERSION created successfully!" 
+echo "Release $VERSION created successfully!"
